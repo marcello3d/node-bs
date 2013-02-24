@@ -94,17 +94,21 @@ load(require('es5-compat-table/data-non-standard'), {
     konq49: ["konqueror", "~4.9"]
 })
 
-exports = function(browserName, browserVersion) {
+module.exports = function(browser) {
+    var browserVersions = browsers[browser.family.toLowerCase()]
+    if (!browserVersions) return {}
+    var version = browser.version || 
+        ((browser.major || 0) + "." + (browser.minor || 0) + "." + (browser.patch || 0))
+    if (/^\d+$/.test(version)) version += ".0.0"
+    else if (/^\d+\.\d+$/.test(version)) version += ".0"
     var result = {}
-    var browserVersions = browsers[browserName]
-    if (browserVersions) 
-        Object.keys(browserVersions).forEach(function(versionRange) {
-            if (semver.satisfies(browserVersion, versionRange)) {
-                var features = browserVersions[versionRange]
-                Object.keys(features).forEach(function(feature) {
-                    result[feature] = features[feature]
-                })
-            }
-        })
+    Object.keys(browserVersions).forEach(function (versionRange) {
+        if (semver.satisfies(version, versionRange)) {
+            var features = browserVersions[versionRange]
+            Object.keys(features).forEach(function (feature) {
+                result[feature] = features[feature]
+            })
+        }
+    })
     return result 
 }
